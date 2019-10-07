@@ -1,18 +1,17 @@
 from tkinter import *
-
-# from crontab import *
+from crontab import *
 from tkinter import OptionMenu
 
 job_list = []
 
-
 def add():
+    list_box.delete(0,END)
     pin = pin_var.get()
     month_on = month_on_var.get()
     day_on = day_on_var.get()
     hour_on = hour_on_var.get()
     minute_on = minute_on_var.get()
-    month_off = minute_off_var.get()
+    month_off = month_off_var.get()
     day_off = day_off_var.get()
     hour_off = hour_off_var.get()
     minute_off = minute_off_var.get()
@@ -20,46 +19,48 @@ def add():
     job_list.append(sub_list)
 
     for job in job_list:
-        list_box.insert(END, "Pin "+str(job[0]) + " ON: "+str(job[1])+"/"+str(job[2])+" "+str(job[3])+":"
+        list_box.insert(END, str(job[0]) + " ON: "+str(job[1])+"/"+str(job[2])+" "+str(job[3])+":"
                         + str(job[4])+"Pin "+str(job[0]) + " OFF: "+str(job[5])+"/"+str(job[6])+" "+str(job[7])+":"
                         + str(job[8]))
 
+        
+    cron = CronTab(user='pi')
+    command_string_on = 'python led_on_off_1.py ' + str(sub_list[0]) + " on"
+    command_string_off = 'python led_on_off_1.py ' + str(sub_list[0]) + " off"
 
-    #command_string_on = 'python_led_on_off_1.py ' + sub_list[0] + " on"
-    #command_string_off = 'python_led_on_off_1.py ' + sub_list[0] + " off"
+    
+    job_on = cron.new(command=command_string_on, comment='jobs')
+    job_off = cron.new(command=command_string_off, comment='jobs')
+    job_on.setall(sub_list[4], sub_list[3], sub_list[2], sub_list[1])
+    job_off.setall(sub_list[8], sub_list[7], sub_list[6], sub_list[5])
+    cron.write()
 
-    #cron = CronTab(user='pi')
-    #job_on = cron.new(command=command_string_on)
-    #job_off = cron.new(command=command_string_off)
 
-    #job_on.setall(sub_list[4], sub_list[3], sub_list[2], sub_list[1])
-    #job_off.setall(sub_list[8], sub_list[7], sub_list[6], sub_list[5])
-    #cron.write()
-
-#TODO modify()
 def modify():
+    x = list_box.get(list_box.curselection())
+    
+    # Tried to use string indices to populate optionBox with the selection
+    # The index changes based on the date.  Couldn't find a solution to this.
 
-    # cron.remove(job)
-    print("modify")
-    # ask for pin, delete job, add new job
 
-#TODO delete()
 def delete():
-    # cron.remove( job )
-    # on button click, ask which pin.  Delete all jobs for that pin
-    print("delete")
-
-#TODO quit_program()
+    
+    # same problem as modify function.  Currently deletes all jobs.
+    list_box.delete(0,END)
+    cron = CronTab(user='pi')
+    cron.remove_all(comment='jobs')
+    cron.write()
+    
 def quit_program():
-    #cron.remove_all()
+    cron = CronTab(user='pi')
+    cron.remove_all(comment='jobs')
+    cron.write()
     main.destroy()
-    # add comment to jobs, delete all jobs with comment on quit.
-
-
+    
 main = Tk()
 frame = Frame(main)
 date_on_1 = StringVar()
-main.geometry('650x600')
+main.geometry('400x500')
 month_on_var = IntVar(main)
 day_on_var = IntVar(main)
 hour_on_var = IntVar(main)
@@ -92,19 +93,18 @@ minute_off_var.set(1)
 pin_var.set(17)
 
 month_entry_on = OptionMenu(main, month_on_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-# TODO set if statement to change day count based on month
 day_entry_on = OptionMenu(main, day_on_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
                           22, 23, 24, 25, 26, 27, 28, 29, 30, 31)
 month_entry_off = OptionMenu(main, month_off_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 day_entry_off = OptionMenu(main, day_off_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
                            22, 23, 24, 25, 26, 27, 28, 29, 30, 31)
 pin_entry = OptionMenu(main, pin_var, 17, 18, 27, 22, 23, 24, 25, 2, 3, 8)
-hour_entry_on = OptionMenu(main, hour_on_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+hour_entry_on = OptionMenu(main, hour_on_var, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
                            22, 23)
 minute_entry_on = OptionMenu(main, minute_on_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                              21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43,
                              44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59)
-hour_entry_off = OptionMenu(main, hour_off_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+hour_entry_off = OptionMenu(main, hour_off_var, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                             21, 22, 23)
 minute_entry_off = OptionMenu(main, minute_off_var, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
                               20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
