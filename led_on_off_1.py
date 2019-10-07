@@ -7,15 +7,16 @@ pin_string = sys.argv[1]
 pin_int = int(pin_string)
 arg_index = ledPins.index(pin_int)
 pin = ledPins[arg_index]
+switch = sys.argv[2]
 
-if (sys.argv[2] == 'on'):
-    switch = GPIO.LOW
+if (switch == 'on'):
+    on_off = GPIO.LOW
 else:
-    switch = GPIO.HIGH
-
-
+    
+    on_off = GPIO.HIGH
+    
 def setup():
-    print("Program is starting......")
+  
     GPIO.setmode(GPIO.BCM)
     for pin in ledPins:
         GPIO.setup(pin, GPIO.OUT)
@@ -23,15 +24,15 @@ def setup():
         
         
 def destroy():
-    for pin in ledPins:
-        GPIO.output(pin, GPIO.HIGH)
+    GPIO.output(pin, GPIO.HIGH)
     GPIO.cleanup()
     
     
 def loop():
     while True:
-        GPIO.output(pin, switch)
-
+        time.sleep(.1)
+        GPIO.output(pin, on_off)
+       
         
 if __name__ == '__main__':
     setup()
